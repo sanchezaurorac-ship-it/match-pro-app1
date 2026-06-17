@@ -92,10 +92,25 @@ if %errorlevel% equ 0 (
     echo ======================================================
 ) else (
     echo.
-    echo ======================================================
+    echo ===============================================================
     echo  [X] Ocurrió un error al subir los cambios a GitHub.
-    echo      Verifica tu conexión a internet o credenciales.
-    echo ======================================================
+    echo ===============================================================
+    echo  Esto suele suceder si Git está usando una cuenta incorrecta
+    echo  o desactualizada en tu computadora.
+    echo.
+    echo  Para solucionarlo:
+    echo  1. Limpia las credenciales antiguas de Windows:
+    echo     - Abre el menú Inicio de Windows y busca:
+    echo       "Administrador de Credenciales"
+    echo     - Haz clic en "Credenciales de Windows".
+    echo     - Busca en la lista de abajo cualquier elemento que empiece
+    echo       con "git:https://github.com" o "github.com".
+    echo     - Haz clic en él y selecciona "Quitar".
+    echo.
+    echo  2. Vuelve a ejecutar este script de subida.
+    echo     - Windows te mostrará una ventana flotante de GitHub
+    echo       para iniciar sesión. Usa la cuenta correcta.
+    echo ===============================================================
 )
 
 echo.
