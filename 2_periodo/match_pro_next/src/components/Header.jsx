@@ -36,14 +36,13 @@ export default function Header() {
       const role = localStorage.getItem('matchProRole');
       setIsArrendador(role === 'arrendador' || pathname?.includes('/arrendador'));
       
-      setCurrentUrl(window.location.pathname + window.location.hash);
-      
-      const handleHashChange = () => {
+      const updateUrl = () => {
         setCurrentUrl(window.location.pathname + window.location.hash);
       };
       
-      window.addEventListener('hashchange', handleHashChange);
-      return () => window.removeEventListener('hashchange', handleHashChange);
+      updateUrl();
+      const interval = setInterval(updateUrl, 150);
+      return () => clearInterval(interval);
     }
   }, [pathname]);
 

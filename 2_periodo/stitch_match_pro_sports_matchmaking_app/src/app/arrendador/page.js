@@ -31,8 +31,8 @@ export default function ArrendadorDashboard() {
 
     handleHashChange();
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    const interval = setInterval(handleHashChange, 150);
+    return () => clearInterval(interval);
   }, []);
 
   return (
