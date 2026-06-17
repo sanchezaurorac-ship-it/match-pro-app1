@@ -58,7 +58,7 @@ export default function ArrendadorDashboard() {
         </section>
 
         {/* Sedes / Complejos */}
-        <section className="mb-10">
+        <section id="complejos" className="mb-10 scroll-mt-24">
           <h2 className="text-xl font-bold font-['Syne'] mb-5 tracking-wide flex items-center gap-2">
             <span className="material-symbols-outlined text-blue-400">domain</span> Tus Complejos Deportivos
           </h2>
@@ -86,7 +86,7 @@ export default function ArrendadorDashboard() {
         </section>
 
         {/* Reservas Activas */}
-        <section>
+        <section id="reservas" className="scroll-mt-24">
           <div className="flex justify-between items-center mb-5 font-['Syne']">
             <h2 className="text-xl font-bold flex items-center gap-2 tracking-wide">
               <span className="material-symbols-outlined text-blue-400">book_online</span> Reservas Recientes

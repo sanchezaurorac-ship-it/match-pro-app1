@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
 import ProfileModal from './ProfileModal';
-import { ArrowLeft, Home, Compass, Trophy, User } from 'lucide-react';
+import { ArrowLeft, Home, Compass, Trophy, User, Building2, Calendar, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Header() {
@@ -27,8 +27,40 @@ export default function Header() {
   }, []);
 
   const handleBack = () => router.back();
+
+  const [isArrendador, setIsArrendador] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('matchProRole');
+      setIsArrendador(role === 'arrendador' || pathname?.includes('/arrendador'));
+      
+      setCurrentUrl(window.location.pathname + window.location.hash);
+      
+      const handleHashChange = () => {
+        setCurrentUrl(window.location.pathname + window.location.hash);
+      };
+      
+      window.addEventListener('hashchange', handleHashChange);
+      return () => window.removeEventListener('hashchange', handleHashChange);
+    }
+  }, [pathname]);
+
+  const checkActive = (href) => {
+    if (href === '#') return false;
+    if (currentUrl === href) return true;
+    if (href === '/arrendador' && (currentUrl === '/arrendador' || currentUrl === '/arrendador#')) return true;
+    if (href === '/' && (currentUrl === '/' || currentUrl === '')) return true;
+    return false;
+  };
   
-  const navLinks = [
+  const navLinks = isArrendador ? [
+    { href: '/arrendador', icon: LayoutDashboard, label: 'Inicio' },
+    { href: '/arrendador#complejos', icon: Building2, label: 'Complejos' },
+    { href: '/arrendador#reservas', icon: Calendar, label: 'Reservas' },
+    { href: '#', icon: User, label: 'Mi Perfil', isModal: true }
+  ] : [
     { href: '/', icon: Home, label: 'Inicio' },
     { href: '/explorar', icon: Compass, label: 'Explorar' },
     { href: '/partidos', icon: Trophy, label: 'Partidos' },
@@ -53,7 +85,7 @@ export default function Header() {
                   </button>
                 );
               }
-              const isActive = pathname === href;
+              const isActive = checkActive(href);
               return (
                 <Link key={href} href={href} className={`flex items-center gap-2 transition-colors ${isActive ? 'text-[#39FF14]' : 'text-gray-400 hover:text-[#39FF14]'}`}>
                   <Icon size={20} fill={isActive ? 'currentColor' : 'none'} />
@@ -67,7 +99,7 @@ export default function Header() {
             <div className="flex flex-col items-end">
               <span className="text-xs text-gray-400 font-medium">Hola,</span>
               <span className="text-sm font-bold text-white leading-tight">
-                {profile?.full_name ? profile.full_name.split(' ')[0] : 'Jugador'}
+                {profile?.full_name ? profile.full_name.split(' ')[0] : (isArrendador ? 'Arrendador' : 'Jugador')}
               </span>
             </div>
             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#39FF14] to-blue-500 p-[2px]">
@@ -82,7 +114,7 @@ export default function Header() {
       {/* Bottom Nav Mobile */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 h-20 pb-safe bg-[#111118]/90 backdrop-blur-xl border-t border-white/10 shadow-[0px_-10px_30px_rgba(57,255,20,0.05)]">
         {navLinks.filter(item => !item.isModal).map(({ href, icon: Icon, label }) => {
-          const isActive = pathname === href;
+          const isActive = checkActive(href);
           return (
             <Link key={href} href={href} className={`flex flex-col items-center justify-center transition-colors transition-transform duration-200 w-16 ${isActive ? 'text-[#39FF14] -translate-y-1 relative' : 'text-white/40 hover:text-white'}`}>
               <Icon size={24} fill={isActive ? 'currentColor' : 'none'} />

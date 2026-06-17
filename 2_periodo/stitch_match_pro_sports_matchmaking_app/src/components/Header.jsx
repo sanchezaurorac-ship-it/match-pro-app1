@@ -26,8 +26,40 @@ export default function Header() {
   }, []);
 
   const handleBack = () => router.back();
+
+  const [isArrendador, setIsArrendador] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('matchProRole');
+      setIsArrendador(role === 'arrendador' || pathname?.includes('/arrendador'));
+      
+      setCurrentUrl(window.location.pathname + window.location.hash);
+      
+      const handleHashChange = () => {
+        setCurrentUrl(window.location.pathname + window.location.hash);
+      };
+      
+      window.addEventListener('hashchange', handleHashChange);
+      return () => window.removeEventListener('hashchange', handleHashChange);
+    }
+  }, [pathname]);
+
+  const checkActive = (href) => {
+    if (href === '#') return false;
+    if (currentUrl === href) return true;
+    if (href === '/arrendador' && (currentUrl === '/arrendador' || currentUrl === '/arrendador#')) return true;
+    if (href === '/' && (currentUrl === '/' || currentUrl === '')) return true;
+    return false;
+  };
   
-  const navLinks = [
+  const navLinks = isArrendador ? [
+    { href: '/arrendador', icon: 'dashboard', label: 'Inicio' },
+    { href: '/arrendador#complejos', icon: 'domain', label: 'Complejos' },
+    { href: '/arrendador#reservas', icon: 'book_online', label: 'Reservas' },
+    { href: '#', icon: 'person', label: 'Mi Perfil', isModal: true }
+  ] : [
     { href: '/', icon: 'home', label: 'Inicio' },
     { href: '/explorar', icon: 'explore', label: 'Explorar' },
     { href: '/partidos', icon: 'sports_soccer', label: 'Partidos' },
@@ -52,7 +84,7 @@ export default function Header() {
                   </button>
                 );
               }
-              const isActive = pathname === href;
+              const isActive = checkActive(href);
               return (
                 <Link key={href} href={href} className={`flex items-center gap-2 transition-colors ${isActive ? 'text-[#39FF14]' : 'text-gray-400 hover:text-[#39FF14]'}`}>
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: isActive ? "'FILL' 1, 'wght' 600" : "'FILL' 0, 'wght' 400" }}>{icon}</span>
@@ -66,7 +98,7 @@ export default function Header() {
             <div className="flex flex-col items-end">
               <span className="text-xs text-gray-400 font-medium font-['Inter']">Hola,</span>
               <span className="text-sm font-bold text-white leading-tight font-['Inter']">
-                {profile?.full_name ? profile.full_name.split(' ')[0] : 'Jugador'}
+                {profile?.full_name ? profile.full_name.split(' ')[0] : (isArrendador ? 'Arrendador' : 'Jugador')}
               </span>
             </div>
             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#39FF14] to-blue-500 p-[2px]">
@@ -81,7 +113,7 @@ export default function Header() {
       {/* Bottom Nav Mobile */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 h-20 pb-safe bg-[#111118]/90 backdrop-blur-xl border-t border-white/10 shadow-[0px_-10px_30px_rgba(57,255,20,0.05)]">
         {navLinks.filter(item => !item.isModal).map(({ href, icon, label }) => {
-          const isActive = pathname === href;
+          const isActive = checkActive(href);
           return (
             <Link key={href} href={href} className={`flex flex-col items-center justify-center transition-colors transition-transform duration-200 w-16 ${isActive ? 'text-[#39FF14] -translate-y-1 relative' : 'text-white/40 hover:text-white'}`}>
               <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: isActive ? "'FILL' 1, 'wght' 600" : "'FILL' 0, 'wght' 400" }}>{icon}</span>
