@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/utils/supabase';
-import { X, User, Construction, LogOut, Trophy, Activity, Star, Building } from 'lucide-react';
+import { X, User, Construction, LogOut, Trophy, Activity, Star, Building, RefreshCw, DollarSign } from 'lucide-react';
 
 export default function ProfileModal({ isOpen, onClose, user, profile, onProfileUpdate }) {
   const [name, setName] = useState(profile?.full_name || '');
@@ -10,6 +10,7 @@ export default function ProfileModal({ isOpen, onClose, user, profile, onProfile
   const [isUpdatingName, setIsUpdatingName] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [supportMessage, setSupportMessage] = useState(false);
+  const [earningsPeriod, setEarningsPeriod] = useState('mes');
 
   if (!isOpen) return null;
 
@@ -38,6 +39,8 @@ export default function ProfileModal({ isOpen, onClose, user, profile, onProfile
     window.location.href = '/login';
   };
 
+  const isArrendador = typeof window !== 'undefined' && (localStorage.getItem('matchProRole') === 'arrendador' || window.location.pathname.includes('/arrendador'));
+
   return (
     <div className="fixed inset-0 z-[100] bg-gray-900 flex flex-col pt-12 px-5 pb-5 overflow-y-auto animate-in fade-in duration-300">
       <div className="flex justify-between items-center mb-8 max-w-md mx-auto w-full">
@@ -56,42 +59,91 @@ export default function ProfileModal({ isOpen, onClose, user, profile, onProfile
           </div>
         </div>
 
-        {/* Estadísticas del Jugador */}
-        <div className="bg-gray-800/60 border border-gray-700/80 rounded-2xl p-5 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.3)] animate-in fade-in duration-500">
-          <div className="flex items-center justify-between mb-4 border-b border-gray-700/50 pb-3">
-            <div className="flex items-center gap-2">
-              <Star size={18} className="text-[#39FF14]" />
-              <span className="text-xs text-gray-400 font-bold uppercase tracking-widest font-['JetBrains_Mono']">Nivel de Juego</span>
+        {/* Estadísticas del Jugador o Arrendador */}
+        {isArrendador ? (
+          /* Estadísticas del Arrendador */
+          <div className="bg-gray-800/60 border border-gray-700/80 rounded-2xl p-5 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.3)] animate-in fade-in duration-500">
+            <div className="flex items-center justify-between mb-4 border-b border-gray-700/50 pb-3">
+              <div className="flex items-center gap-2">
+                <DollarSign size={18} className="text-blue-400" />
+                <span className="text-xs text-gray-400 font-bold uppercase tracking-widest font-['JetBrains_Mono']">Finanzas ({earningsPeriod === 'mes' ? 'Mensual' : earningsPeriod === '6meses' ? '6 Meses' : 'Anual'})</span>
+              </div>
+              <button 
+                onClick={() => {
+                  setEarningsPeriod(prev => prev === 'mes' ? '6meses' : prev === '6meses' ? 'ano' : 'mes');
+                }}
+                className="flex items-center gap-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-bold px-3 py-1.5 rounded-full border border-blue-500/30 hover:border-blue-500/50 transition-colors uppercase tracking-wider font-['JetBrains_Mono'] cursor-pointer"
+              >
+                <RefreshCw size={10} /> {earningsPeriod === 'mes' ? 'Este Mes' : earningsPeriod === '6meses' ? '6 Meses' : 'Último Año'}
+              </button>
             </div>
-            <span className="bg-[#39FF14]/20 text-[#39FF14] text-xs font-black px-3 py-1 rounded-full border border-[#39FF14]/40 shadow-[0_0_15px_rgba(57,255,20,0.2)] font-['Syne']">
-              PRO / 4ta Categoría
-            </span>
-          </div>
 
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="bg-gray-900/50 border border-gray-700/40 rounded-xl p-3 flex flex-col items-center justify-center group hover:border-[#39FF14]/50 transition-colors">
-              <div className="flex items-center gap-1 mb-1">
-                <Trophy size={14} className="text-gray-400 group-hover:text-[#39FF14] transition-colors" />
-                <span className="text-2xl font-black text-white font-['Syne']">28</span>
-              </div>
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-['JetBrains_Mono'] font-semibold">Partidos</span>
+            <div className="mb-4 text-center py-2">
+              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-['JetBrains_Mono'] block mb-1">Ganancias Totales</span>
+              <h3 className="text-4xl font-black text-white font-['Syne'] tracking-wide">
+                {earningsPeriod === 'mes' ? '$3,650' : earningsPeriod === '6meses' ? '$21,900' : '$43,800'}
+              </h3>
+              <span className="text-[#39FF14] text-xs font-bold flex items-center justify-center gap-1 mt-1 font-['Inter']">
+                <Activity size={12} className="text-[#39FF14]" />
+                {earningsPeriod === 'mes' ? '+15% vs mes anterior' : earningsPeriod === '6meses' ? '+18% vs anterior' : '+22% vs anterior'}
+              </span>
             </div>
-            <div className="bg-gray-900/50 border border-gray-700/40 rounded-xl p-3 flex flex-col items-center justify-center group hover:border-[#39FF14]/50 transition-colors">
-              <div className="flex items-center gap-1 mb-1">
-                <Activity size={14} className="text-[#39FF14]" />
-                <span className="text-2xl font-black text-[#39FF14] font-['Syne'] shadow-[0_0_20px_rgba(57,255,20,0.2)]">75%</span>
+
+            <div className="grid grid-cols-2 gap-3 text-center border-t border-gray-700/50 pt-4">
+              <div className="bg-gray-900/50 border border-gray-700/40 rounded-xl p-3 flex flex-col items-center justify-center group hover:border-[#39FF14]/50 transition-colors">
+                <div className="flex items-center gap-1 mb-1">
+                  <Building size={14} className="text-gray-400 group-hover:text-[#39FF14] transition-colors" />
+                  <span className="text-xl font-black text-white font-['Syne']">124</span>
+                </div>
+                <span className="text-[9px] text-gray-400 uppercase tracking-wider font-['JetBrains_Mono'] font-bold">Canchas Alquiladas</span>
               </div>
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-['JetBrains_Mono'] font-semibold">Victorias</span>
-            </div>
-            <div className="bg-gray-900/50 border border-gray-700/40 rounded-xl p-3 flex flex-col items-center justify-center group hover:border-blue-500/50 transition-colors">
-              <div className="flex items-center gap-1 mb-1">
-                <Star size={14} className="text-blue-400" />
-                <span className="text-2xl font-black text-blue-400 font-['Syne']">15</span>
+              <div className="bg-gray-900/50 border border-gray-700/40 rounded-xl p-3 flex flex-col items-center justify-center group hover:border-[#39FF14]/50 transition-colors">
+                <div className="flex items-center gap-1 mb-1 animate-in fade-in">
+                  <Star size={14} className="text-yellow-500" />
+                  <span className="text-xl font-black text-white font-['Syne']">4.9</span>
+                </div>
+                <span className="text-[9px] text-gray-400 uppercase tracking-wider font-['JetBrains_Mono'] font-bold">Reseña del Perfil</span>
               </div>
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-['JetBrains_Mono'] font-semibold">MVPs</span>
             </div>
           </div>
-        </div>
+        ) : (
+          /* Estadísticas del Jugador */
+          <div className="bg-gray-800/60 border border-gray-700/80 rounded-2xl p-5 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.3)] animate-in fade-in duration-500">
+            <div className="flex items-center justify-between mb-4 border-b border-gray-700/50 pb-3">
+              <div className="flex items-center gap-2">
+                <Star size={18} className="text-[#39FF14]" />
+                <span className="text-xs text-gray-400 font-bold uppercase tracking-widest font-['JetBrains_Mono']">Nivel de Juego</span>
+              </div>
+              <span className="bg-[#39FF14]/20 text-[#39FF14] text-xs font-black px-3 py-1 rounded-full border border-[#39FF14]/40 shadow-[0_0_15px_rgba(57,255,20,0.2)] font-['Syne']">
+                PRO / 4ta Categoría
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="bg-gray-900/50 border border-gray-700/40 rounded-xl p-3 flex flex-col items-center justify-center group hover:border-[#39FF14]/50 transition-colors">
+                <div className="flex items-center gap-1 mb-1">
+                  <Trophy size={14} className="text-gray-400 group-hover:text-[#39FF14] transition-colors" />
+                  <span className="text-2xl font-black text-white font-['Syne']">28</span>
+                </div>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider font-['JetBrains_Mono'] font-semibold">Partidos</span>
+              </div>
+              <div className="bg-gray-900/50 border border-gray-700/40 rounded-xl p-3 flex flex-col items-center justify-center group hover:border-[#39FF14]/50 transition-colors">
+                <div className="flex items-center gap-1 mb-1">
+                  <Activity size={14} className="text-[#39FF14]" />
+                  <span className="text-2xl font-black text-[#39FF14] font-['Syne'] shadow-[0_0_20px_rgba(57,255,20,0.2)]">75%</span>
+                </div>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider font-['JetBrains_Mono'] font-semibold">Victorias</span>
+              </div>
+              <div className="bg-gray-900/50 border border-gray-700/40 rounded-xl p-3 flex flex-col items-center justify-center group hover:border-blue-500/50 transition-colors">
+                <div className="flex items-center gap-1 mb-1">
+                  <Star size={14} className="text-blue-400" />
+                  <span className="text-2xl font-black text-blue-400 font-['Syne']">15</span>
+                </div>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider font-['JetBrains_Mono'] font-semibold">MVPs</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col gap-2">
           <label className="text-gray-400 text-xs font-bold uppercase tracking-widest">Nombre Completo</label>
